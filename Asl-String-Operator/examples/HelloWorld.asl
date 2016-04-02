@@ -1,3 +1,5 @@
 func main()
-  write "Hello world !%n";
+    a = "hola";
+    write a; write "%n";
+    if a = "hola" then write "YES" endif
 endfunc

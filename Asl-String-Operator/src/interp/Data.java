@@ -41,25 +41,31 @@ import parser.*;
 
 public class Data {
     /** Types of data */
-    public enum Type {VOID, BOOLEAN, INTEGER;}
+    public enum Type {VOID, BOOLEAN, INTEGER, STRING;}
 
     /** Type of data*/
     private Type type;
 
     /** Value of the data */
-    private int value; 
+    private int value;
+
+    /** String value of the data */
+    private String string_value;
 
     /** Constructor for integers */
-    Data(int v) { type = Type.INTEGER; value = v; }
+    Data(int v) { type = Type.INTEGER; value = v; string_value = ""; }
 
     /** Constructor for Booleans */
-    Data(boolean b) { type = Type.BOOLEAN; value = b ? 1 : 0; }
+    Data(boolean b) { type = Type.BOOLEAN; value = b ? 1 : 0; string_value = ""; }
+
+    /** Constructor for Strings */
+    Data(String s) { type = Type.STRING; string_value = s; value = 0; }
 
     /** Constructor for void data */
     Data() {type = Type.VOID; }
 
     /** Copy constructor */
-    Data(Data d) { type = d.type; value = d.value; }
+    Data(Data d) { type = d.type; value = d.value; string_value = d.string_value; }
 
     /** Returns the type of data */
     public Type getType() { return type; }
@@ -69,6 +75,9 @@ public class Data {
 
     /** Indicates whether the data is integer */
     public boolean isInteger() { return type == Type.INTEGER; }
+
+    /** Indicates whether the data is string */
+    public boolean isString() { return type == Type.STRING; }
 
     /** Indicates whether the data is void */
     public boolean isVoid() { return type == Type.VOID; }
@@ -80,6 +89,15 @@ public class Data {
     public int getIntegerValue() {
         assert type == Type.INTEGER;
         return value;
+    }
+
+    /**
+     * Gets the value of a string data. The method asserts that
+     * the data is a string.
+     */
+    public String getStringValue() {
+        assert type == Type.STRING;
+        return string_value;
     }
 
     /**
@@ -97,15 +115,19 @@ public class Data {
     /** Defines an integer value for the data */
     public void setValue(int v) { type = Type.INTEGER; value = v; }
 
+    /** Defines a String value for the data */
+    public void setValue(String s) { type = Type.STRING; string_value = s; }
+
     /** Copies the value from another data */
-    public void setData(Data d) { type = d.type; value = d.value; }
-    
+    public void setData(Data d) { type = d.type; value = d.value; string_value = d.string_value; }
+
     /** Returns a string representing the data in textual form. */
     public String toString() {
         if (type == Type.BOOLEAN) return value == 1 ? "true" : "false";
+        else if (type == Type.STRING) return string_value;
         return Integer.toString(value);
     }
-    
+
     /**
      * Checks for zero (for division). It raises an exception in case
      * the value is zero.
@@ -120,7 +142,7 @@ public class Data {
      * @param op Type of operator (token).
      * @param d Second operand.
      */
-     
+
     public void evaluateArithmetic (int op, Data d) {
         assert type == Type.INTEGER && d.type == Type.INTEGER;
         switch (op) {
@@ -141,14 +163,27 @@ public class Data {
      */
     public Data evaluateRelational (int op, Data d) {
         assert type != Type.VOID && type == d.type;
+        if (type == Type.STRING) {
         switch (op) {
-            case AslLexer.EQUAL: return new Data(value == d.value);
-            case AslLexer.NOT_EQUAL: return new Data(value != d.value);
-            case AslLexer.LT: return new Data(value < d.value);
-            case AslLexer.LE: return new Data(value <= d.value);
-            case AslLexer.GT: return new Data(value > d.value);
-            case AslLexer.GE: return new Data(value >= d.value);
-            default: assert false; 
+                case AslLexer.EQUAL: return new Data(string_value.equals(d.string_value));
+                case AslLexer.NOT_EQUAL: return new Data(!string_value.equals(d.string_value));
+                case AslLexer.LT: return new Data( false );
+                case AslLexer.LE: return new Data( false );
+                case AslLexer.GT: return new Data( false );
+                case AslLexer.GE: return new Data( false );
+                default: assert false;
+            }
+        }
+        else {
+        switch (op) {
+                case AslLexer.EQUAL: return new Data(value == d.value);
+                case AslLexer.NOT_EQUAL: return new Data(value != d.value);
+                case AslLexer.LT: return new Data(value < d.value);
+                case AslLexer.LE: return new Data(value <= d.value);
+                case AslLexer.GT: return new Data(value > d.value);
+                case AslLexer.GE: return new Data(value >= d.value);
+                default: assert false;
+            }
         }
         return null;
     }
