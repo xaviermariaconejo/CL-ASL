@@ -44,6 +44,7 @@ tokens {
     BOOLEAN;    // Boolean atom (for Boolean constants "true" or "false")
     PVALUE;     // Parameter by value in the list of parameters
     PREF;       // Parameter by reference in the list of parameters
+    TERNARY;    // New conditional
 }
 
 @header {
@@ -88,6 +89,7 @@ block_instructions
 instruction
         :	assign          // Assignment
         |	ite_stmt        // if-then-else
+       // |   ternary         // ternary conditional
         |	while_stmt      // while statement
         |   funcall         // Call to a procedure (no result produced)
         |	return_stmt     // Return statement
@@ -102,6 +104,12 @@ assign	:	ID eq=EQUAL expr -> ^(ASSIGN[$eq,":="] ID expr)
 
 // if-then-else (else is optional)
 ite_stmt	:	IF^ expr THEN! block_instructions (ELSE! block_instructions)? ENDIF!
+            ;
+
+// Ternary conditional
+ternary     :   ID (comp=EQUAL | comp=NOT_EQUAL | comp=LT | comp=LE | comp=GT | comp=GE)
+                num_expr QUEST num_expr DDOT num_expr
+                -> ^(TERNARY[$comp, $comp.text] ID num_expr ^(QUEST num_expr num_expr))
             ;
 
 // while statement
@@ -189,6 +197,8 @@ TRUE    : 'true' ;
 FALSE   : 'false';
 ID  	:	('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')* ;
 INT 	:	'0'..'9'+ ;
+QUEST   : '?';
+DDOT    : ':';
 
 // C-style comments
 COMMENT	: '//' ~('\n'|'\r')* '\r'? '\n' {$channel=HIDDEN;}
