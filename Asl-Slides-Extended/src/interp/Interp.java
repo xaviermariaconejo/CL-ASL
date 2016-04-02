@@ -510,7 +510,16 @@ public class Interp {
             setLineNumber(a);
             if (p.getType() == AslLexer.PVALUE) {
                 // Pass by value: evaluate the expression
-                Params.add(i,evaluateExpression(a));
+                if (Stack.isArray(a.getText())) {
+                    // Pass by reference: check that it is a variable
+                    if (a.getType() != AslLexer.ID) {
+                        throw new RuntimeException("Wrong argument for pass by reference");
+                    }
+                    // Find the variable and pass the reference
+                    Data v = Stack.getVariable(a.getText());
+                    Params.add(i,v);
+                }
+                else Params.add(i,evaluateExpression(a));
             } else {
                 // Pass by reference: check that it is a variable
                 if (a.getType() != AslLexer.ID) {

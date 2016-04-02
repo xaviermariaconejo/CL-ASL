@@ -100,7 +100,7 @@ public class Stack {
             CurrentAR.put(name, d); // New definition
         }
         else {
-            d = new ArrayList<Data>();
+            d.clear();
             d.add(value);
         }
     }
@@ -112,15 +112,15 @@ public class Stack {
         ArrayList<Data> d = CurrentAR.get(name);
         if (d == null) {
             d = new ArrayList<Data>();
-            for (int i = 0; i <= index.getIntegerValue(); ++i)
+            for (int i = -1; i <= index.getIntegerValue(); ++i)
                 d.add(new Data(0));
-            d.set(index.getIntegerValue(), value);
+            d.set(index.getIntegerValue() + 1, value);
             CurrentAR.put(name, d); // New definition
         }
         else {
-            for (int i = d.size(); i <= index.getIntegerValue(); ++i)
+            for (int i = d.size() - 1; i <= index.getIntegerValue(); ++i)
                 d.add(new Data(0));
-            d.set(index.getIntegerValue(), value);
+            d.set(index.getIntegerValue() + 1, value);
         }
     }
 
@@ -147,10 +147,18 @@ public class Stack {
         if (v == null) {
             throw new RuntimeException ("Variable " + name + " not defined");
         }
-        if (v.size() <= index.getIntegerValue()) {
+        if (v.size() <= index.getIntegerValue() + 1) {
             throw new RuntimeException ("Array " + name + " OutofBounds: Array has " + v.size() + " elements and index is " + index.getIntegerValue());
         }
-        return v.get(index.getIntegerValue());
+        return v.get(index.getIntegerValue() + 1);
+    }
+
+    public boolean isArray(String name) {
+        ArrayList<Data> v = CurrentAR.get(name);
+        if (v == null) {
+            throw new RuntimeException ("Variable " + name + " not defined");
+        }
+        return v.size() > 1;
     }
 
     /**
